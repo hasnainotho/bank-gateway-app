@@ -15,7 +15,7 @@ export async function GET(req) {
   // get_bank_credentials
   const bank_credentials = await axios.get(
     // 'http://192.168.11.23:8890/payment_method/bank/details',
-    'http://127.0.0.1:8000/payment_method/bank/details',
+    'https://b539-103-86-54-83.ngrok-free.app/payment_method/bank/details',
     {
       headers: {
         'Content-Type': 'application/json',
@@ -68,7 +68,7 @@ export async function GET(req) {
   try {
     post_data = await axios.post(
       // 'http://192.168.11.23:8890/payment_method/bank/save_transaction',
-      'http://127.0.0.1:8000/payment_method/bank/save_transaction',
+      'https://b539-103-86-54-83.ngrok-free.app/payment_method/bank/save_transaction',
       pythonApiPayload,
       {
         headers: {
