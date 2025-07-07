@@ -49,7 +49,8 @@ export async function POST(req) {
           name: "TESTATMOSPHERGYM",
           url: "https://bank-2kxtlcd1f-ghulam-hasnains-projects.vercel.app/"
         },
-        returnUrl: `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/success?orderId=${orderId}&org_id=${org_id}&auth_token=${decoded.auth_token}`
+        // returnUrl: `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/success?orderId=${orderId}&org_id=${org_id}&auth_token=${decoded.auth_token}`
+        returnUrl: `${process.env.NEXT_PUBLIC_BASE_URL || "https://bank-gateway-app.vercel.app"}/success?orderId=${orderId}&org_id=${org_id}&auth_token=${decoded.auth_token}`
       },
       order: {
         currency: "PKR",
