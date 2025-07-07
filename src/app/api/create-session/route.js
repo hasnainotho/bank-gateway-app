@@ -19,7 +19,7 @@ export async function POST(req) {
     // get_bank_credentials
     const account_credentials = await axios.get(
       // 'http://192.168.11.23:8890/payment_method/bank/details',
-      'https://b539-103-86-54-83.ngrok-free.app/payment_method/bank/details',
+      'https://760f-182-184-78-176.ngrok-free.app/payment_method/bank/details',
       {
         headers: {
           'Content-Type': 'application/json',
