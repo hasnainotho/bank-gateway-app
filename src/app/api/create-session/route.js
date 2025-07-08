@@ -18,7 +18,7 @@ export async function POST(req) {
     if (!amount || !org_id) return new Response(JSON.stringify({ error: 'Amount or Org ID missing in token' }), { status: 400 });
     // get_bank_credentials
     const account_credentials = await axios.get(
-      'http://192.168.11.23:8890/payment_method/bank/details',
+      `${process.env.NEXT_PUBLIC_API_URL}/payment_method/bank/details`,
       // 'https://760f-182-184-78-176.ngrok-free.app/payment_method/bank/details',
       {
         headers: {

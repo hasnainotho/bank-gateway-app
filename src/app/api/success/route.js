@@ -14,7 +14,7 @@ export async function GET(req) {
   }
   // get_bank_credentials
   const bank_credentials = await axios.get(
-    'http://192.168.11.23:8890/payment_method/bank/details',
+    `${process.env.NEXT_PUBLIC_API_URL}/payment_method/bank/details`,
     // 'https://760f-182-184-78-176.ngrok-free.app/payment_method/bank/details',
     {
       headers: {
@@ -67,7 +67,7 @@ export async function GET(req) {
   let post_data;
   try {
     post_data = await axios.post(
-      'http://192.168.11.23:8890/payment_method/bank/save_transaction',
+      `${process.env.NEXT_PUBLIC_API_URL}/payment_method/bank/save_transaction`,
       // 'https://760f-182-184-78-176.ngrok-free.app/payment_method/bank/save_transaction',
       pythonApiPayload,
       {
