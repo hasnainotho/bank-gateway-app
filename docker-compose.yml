@@ -6,6 +6,6 @@ services:
       context: .
       dockerfile: Dockerfile
     env_file:
-      - .env.production
+      - .env
     environment:
       - NODE_ENV=production
