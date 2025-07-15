@@ -6,7 +6,8 @@ export async function POST(req) {
     const body = await req.json();
     const { token } = body;
     if (!token) return new Response(JSON.stringify({ error: 'Missing token' }), { status: 400 });
-    const JWT_SECRET = 'a-string-secret-at-least-256-bits-long';
+    const JWT_SECRET = process.env.JWT_SECRET
+    
     let decoded;
     try {
       decoded = jwt.verify(token, JWT_SECRET);
