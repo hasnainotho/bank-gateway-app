@@ -8,15 +8,26 @@ export async function POST(req) {
     if (!token) return new Response(JSON.stringify({ error: 'Missing token' }), { status: 400 });
     const JWT_SECRET = process.env.JWT_SECRET
     
+    if (!JWT_SECRET) {
+      console.error('JWT_SECRET is not defined in environment variables');
+      return new Response(JSON.stringify({ error: 'Server configuration error' }), { status: 500 });
+    }
+    
     let decoded;
     try {
       decoded = jwt.verify(token, JWT_SECRET);
     } catch (err) {
+      console.error('JWT verification error:', err.message);
       return new Response(JSON.stringify({ error: 'Invalid token' }), { status: 401 });
     }
     const amount = decoded.amount;
     const org_id = decoded.org_id;
+    const booking_id = decoded.booking_id;
     if (!amount || !org_id) return new Response(JSON.stringify({ error: 'Amount or Org ID missing in token' }), { status: 400 });
+    
+    console.log('Decoded token:', { amount, org_id, booking_id: decoded.booking_id });
+    console.log('Making API call to:', `${process.env.NEXT_PUBLIC_API_URL}/payment_method/bank/details`);
+    
     // get_bank_credentials
     const account_credentials = await axios.get(
       `${process.env.NEXT_PUBLIC_API_URL}/payment_method/bank/details`,
@@ -28,7 +39,13 @@ export async function POST(req) {
         },
         params: { org_id }
       }
-    ).then(data => ({ data: data.data, success: true })).catch(error => ({ success: false, message: error.response?.data?.detail || "Failed to retrieve bank credentials" }));
+    ).then(data => {
+      console.log('Bank credentials response:', data.data);
+      return { data: data.data, success: true };
+    }).catch(error => {
+      console.error('Bank credentials error:', error.response?.data || error.message);
+      return { success: false, message: error.response?.data?.detail || "Failed to retrieve bank credentials" };
+    });
     if (!account_credentials.success || !account_credentials.data) {
       return new Response(JSON.stringify({ error: account_credentials.message || 'Failed to retrieve bank credentials' }), { status: 500 });
     }
@@ -36,11 +53,17 @@ export async function POST(req) {
     const merchant_api_key = account_credentials.data.merchant_api_key;
     const merchant_url = account_credentials.data.merchant_url;
     if (!merchant_account || !merchant_api_key || !merchant_url) {
+      console.error('Missing merchant credentials:', { merchant_account, merchant_api_key, merchant_url });
       return new Response(JSON.stringify({ error: 'Merchant credentials missing' }), { status: 400 });
     }
+    
+    console.log('Merchant credentials:', { merchant_account, merchant_url });
+    
     const authString = `merchant.${merchant_account}:${merchant_api_key}`;
     const authHeader = `Basic ${Buffer.from(authString).toString('base64')}`;
     const orderId = "ORDER-" + Math.floor(Math.random() * 100000);
+    
+    console.log('Order ID:', orderId);
     const payload = {
       apiOperation: "INITIATE_CHECKOUT",
       checkoutMode: "WEBSITE",
@@ -60,6 +83,10 @@ export async function POST(req) {
         description: "Goods and Services"
       }
     };
+    
+    console.log('Payment session payload:', payload);
+    console.log('Making payment session request to:', `${merchant_url}/api/rest/version/100/merchant/${merchant_account}/session`);
+    
     const response = await axios.post(
       `${merchant_url}/api/rest/version/100/merchant/${merchant_account}/session`,
       payload,
@@ -70,8 +97,11 @@ export async function POST(req) {
         },
       }
     );
+    
+    console.log('Payment session response:', response.data);
     return new Response(JSON.stringify(response.data), { status: 200 });
   } catch (err) {
+    console.error('Server error:', err.response?.data || err.message);
     return new Response(JSON.stringify({ error: err.response?.data || err.message }), { status: 500 });
   }
 }
