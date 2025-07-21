@@ -11,6 +11,9 @@ export default function TransactionSuccessCard({ result, pythonApiPayload }: any
           <div className="w-full flex flex-col gap-2 text-left bg-gray-50 rounded-lg p-4 mb-4">
             <div><span className="font-semibold text-gray-600">Order ID:</span> <span className="text-gray-900">{result.id}</span></div>
             <div><span className="font-semibold text-gray-600">Amount:</span> <span className="text-gray-900">{result.amount} {result.currency}</span></div>
+            <div><span className="font-semibold text-gray-600">Receipt Number:</span> <span className="text-gray-900">{pythonApiPayload.receipt_number}</span></div>
+            <div><span className="font-semibold text-gray-600">Date:</span> <span className="text-gray-900">{pythonApiPayload.date}</span></div>
+            <div><span className="font-semibold text-gray-600">Time:</span> <span className="text-gray-900">{pythonApiPayload.time}</span></div>
             <div><span className="font-semibold text-gray-600">Status:</span> <span className="text-gray-900">{result.status}</span></div>
             <div><span className="font-semibold text-gray-600">Card Brand:</span> <span className="text-gray-900">{pythonApiPayload.source}</span></div>
             <div><span className="font-semibold text-gray-600">Transaction Type:</span> <span className="text-gray-900">{pythonApiPayload.transaction_type}</span></div>

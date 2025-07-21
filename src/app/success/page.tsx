@@ -14,12 +14,13 @@ export default function SuccessPage() {
     const orderId = params.get("orderId");
     const org_id = params.get("org_id");
     const auth_token = params.get("auth_token");
-    if (!orderId || !org_id || !auth_token) {
+    const booking_id = params.get("booking_id");
+    if (!orderId || !org_id || !booking_id || !auth_token) {
       setStatus("error");
-      setError({ title: "Missing Required Fields", message: "Please provide all required fields (orderId, org_id, auth_token)." });
+      setError({ title: "Missing Required Fields", message: "Please provide all required"});
       return;
     }
-    fetch(`/api/success?orderId=${orderId}&org_id=${org_id}&auth_token=${auth_token}`)
+    fetch(`/api/success?orderId=${orderId}&org_id=${org_id}&booking_id=${booking_id}&auth_token=${auth_token}`)
       .then(async (res) => {
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));

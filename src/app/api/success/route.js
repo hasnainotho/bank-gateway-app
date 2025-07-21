@@ -4,7 +4,26 @@ export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const orderId = searchParams.get('orderId');
   const org_id = searchParams.get('org_id');
+  const booking_id = searchParams.get('booking_id');
   const auth_token = searchParams.get('auth_token');
+
+  function extractDateTimeWithOffset(isoString, timeZone) {
+  const dateUtc = new Date(isoString);
+
+  const sign = timeZone[0] === '+' ? 1 : -1;
+  const hoursOffset = parseInt(timeZone.slice(1, 3), 10);
+  const minutesOffset = parseInt(timeZone.slice(3, 5), 10);
+  const offsetMs = sign * (hoursOffset * 60 + minutesOffset) * 60 * 1000;
+
+  const localDate = new Date(dateUtc.getTime() + offsetMs);
+
+  return {
+    date: localDate.toISOString().split('T')[0],
+    time: localDate.toTimeString().split(' ')[0]
+  };
+}
+
+  
   if (!auth_token || !org_id || !orderId) {
     return new Response(JSON.stringify({
       error: true,
@@ -45,6 +64,7 @@ export async function GET(req) {
     }
   ).catch(error => ({ data: { result: "FAILED", description: error.response?.data?.error || error.message } }));
   const result = transactionResponse.data;
+  console.log("Transaction result:", result);
   if (result.result !== "SUCCESS") {
     return new Response(JSON.stringify({
       error: true,
@@ -53,6 +73,7 @@ export async function GET(req) {
     }), { status: 400, headers: { 'Content-Type': 'application/json' } });
   }
   const paymentTxn = result.transaction?.find(t => t.transaction?.type === 'PAYMENT');
+  const timezone = extractDateTimeWithOffset(paymentTxn?.timeOfLastUpdate, paymentTxn?.transaction?.timeZone || "+0000");
   const pythonApiPayload = {
     transaction_id: paymentTxn?.transaction?.id || 0,
     order_id: result.id,
@@ -61,8 +82,13 @@ export async function GET(req) {
     status: result.status,
     result: result.result,
     source: result.sourceOfFunds?.provided?.card?.brand || "UNKNOWN",
-    amount: result.amount
+    receipt_number: paymentTxn?.transaction?.receipt || "N/A",
+    amount: result.amount,
+    booking_id: booking_id,
+    date: timezone.date,
+    time: timezone.time,
   };
+  console.log("Python API Payload:", paymentTxn);
   // post_bank_data
   let post_data;
   try {
@@ -70,12 +96,12 @@ export async function GET(req) {
       `${process.env.NEXT_PUBLIC_API_URL}/payment_method/bank/save_transaction`,
       // 'https://760f-182-184-78-176.ngrok-free.app/payment_method/bank/save_transaction',
       pythonApiPayload,
+      // paymentTxn,
       {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${auth_token}`
-        },
-        params: { org_id }
+        }
       }
     ).then(() => ({ success: true })).catch(error => {
       // Check for duplicate/exists error
@@ -86,6 +112,7 @@ export async function GET(req) {
       return { success: false, message: msg };
     });
   } catch (err) {
+    console.error("Error saving transaction data:", err);
     post_data = { success: false, message: err.message };
   }
   if (!post_data?.success) {
@@ -102,6 +129,31 @@ export async function GET(req) {
       message: post_data.message || "Failed to save transaction."
     }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
+
+  console.log("Transaction saved successfully:", post_data);
+  let booking_status;
+  try{
+    const bookingResponse = await axios.patch(
+      `${process.env.NEXT_PUBLIC_API_URL}/bookings/${booking_id}/update-status`,
+      {
+        action: "booking_approved",
+        payment_action: "paid",
+        reason: "Bank Payment",
+        org_id: org_id,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth_token}`
+        }
+      }
+    );
+    booking_status = bookingResponse.data;
+  } catch (error) {
+    console.error("Error updating booking status:", error);
+  }
+  console.log("Booking status updated:", booking_status);
+  // const booking_status 
   // Success JSON response
   return new Response(JSON.stringify({
     success: true,

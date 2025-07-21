@@ -31,8 +31,7 @@ export default function Home() {
         loaderDiv.innerHTML = `
           <div class="container mx-auto max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center mt-10">
             <div class="logo text-3xl font-bold text-green-400 mb-6 tracking-wide">Bank Payment</div>
-            <div class="loader border-4 border-gray-100 border-t-4 border-t-green-400 rounded-full w-12 h-12 animate-spin mx-auto mb-6"></div>
-            <div class="text-gray-700">Loading, please wait...</div>
+            <div class="text-gray-700 text-lg">Please wait while bank API processes your payment...</div>
           </div>
         `;
         const response = await fetch("/api/create-session", {
@@ -95,8 +94,7 @@ export default function Home() {
       <div id="loader">
         <div className="container mx-auto max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center mt-10">
           <div className="logo text-3xl font-bold text-green-400 mb-6 tracking-wide">Bank Payment</div>
-          <div className="loader border-4 border-gray-100 border-t-4 border-t-green-400 rounded-full w-12 h-12 animate-spin mx-auto mb-6"></div>
-          <div className="text-gray-700">Loading, please wait...</div>
+          <div className="text-gray-700 text-lg">Please wait while bank API processes your payment...</div>
         </div>
       </div>
     </div>
