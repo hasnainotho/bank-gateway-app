@@ -93,7 +93,10 @@ export async function GET(req) {
   try {
     post_data = await axios.post(
       `${process.env.NEXT_PUBLIC_API_URL}/payment_method/bank/save_transaction`,
-      pythonApiPayload,
+      {
+        "data": pythonApiPayload,
+        "org_id": org_id,
+      },
       {
         headers: {
           'Content-Type': 'application/json',

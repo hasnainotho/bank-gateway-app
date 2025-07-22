@@ -41,7 +41,7 @@ export async function POST(req) {
       console.error('Booking details error:', error.response?.data || error.message);
       return { success: false, message: error.response?.data?.detail || "Failed to retrieve booking details" };
     });
-    if (!booking || !booking.id || booking.status !== 'pending') {
+    if (!booking || !booking.id || booking.payment_status !== 'pending') {
       console.error('invalid Booking:', booking);
       return new Response(JSON.stringify({ error: 'Booking not found or invalid' }), { status: 404 });
     }
