@@ -28,10 +28,28 @@ export async function POST(req) {
     console.log('Decoded token:', { amount, org_id, booking_id: decoded.booking_id });
     console.log('Making API call to:', `${process.env.NEXT_PUBLIC_API_URL}/payment_method/bank/details`);
     
-    // get_bank_credentials
+    const booking = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/bookings/${booking_id}`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${decoded.auth_token}`
+        },
+        params: { org_id }
+      }
+    ).then(response => response.data).catch(error => {
+      console.error('Booking details error:', error.response?.data || error.message);
+      return { success: false, message: error.response?.data?.detail || "Failed to retrieve booking details" };
+    });
+    if (!booking || !booking.id || booking.status !== 'pending') {
+      console.error('invalid Booking:', booking);
+      return new Response(JSON.stringify({ error: 'Booking not found or invalid' }), { status: 404 });
+    }
+
+    console.log('Booking details:', booking);
+    
     const account_credentials = await axios.get(
       `${process.env.NEXT_PUBLIC_API_URL}/payment_method/bank/details`,
-      // 'https://760f-182-184-78-176.ngrok-free.app/payment_method/bank/details',
       {
         headers: {
           'Content-Type': 'application/json',
@@ -73,7 +91,6 @@ export async function POST(req) {
           name: "TESTATMOSPHERGYM",
           url: "https://bank-2kxtlcd1f-ghulam-hasnains-projects.vercel.app/"
         },
-        // returnUrl: `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/success?orderId=${orderId}&org_id=${org_id}&auth_token=${decoded.auth_token}`
         returnUrl: `${process.env.NEXT_PUBLIC_BASE_URL || "https://bank-gateway-app.vercel.app"}/success?orderId=${orderId}&org_id=${org_id}&booking_id=${booking_id}&auth_token=${decoded.auth_token}`
       },
       order: {

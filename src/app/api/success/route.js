@@ -34,7 +34,6 @@ export async function GET(req) {
   // get_bank_credentials
   const bank_credentials = await axios.get(
     `${process.env.NEXT_PUBLIC_API_URL}/payment_method/bank/details`,
-    // 'https://760f-182-184-78-176.ngrok-free.app/payment_method/bank/details',
     {
       headers: {
         'Content-Type': 'application/json',
@@ -53,7 +52,7 @@ export async function GET(req) {
   const merchant_url = bank_credentials.data.merchant_url;
   const merchant_account = bank_credentials.data.merchant_account;
   const merchant_api_key = bank_credentials.data.merchant_api_key;
-  // get transaction
+  
   const transactionResponse = await axios.get(
     `${merchant_url}/api/rest/version/100/merchant/${merchant_account}/order/${orderId}`,
     {
@@ -94,9 +93,7 @@ export async function GET(req) {
   try {
     post_data = await axios.post(
       `${process.env.NEXT_PUBLIC_API_URL}/payment_method/bank/save_transaction`,
-      // 'https://760f-182-184-78-176.ngrok-free.app/payment_method/bank/save_transaction',
       pythonApiPayload,
-      // paymentTxn,
       {
         headers: {
           'Content-Type': 'application/json',
@@ -153,8 +150,6 @@ export async function GET(req) {
     console.error("Error updating booking status:", error);
   }
   console.log("Booking status updated:", booking_status);
-  // const booking_status 
-  // Success JSON response
   return new Response(JSON.stringify({
     success: true,
     result,
